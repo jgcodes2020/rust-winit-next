@@ -31,6 +31,8 @@ pub trait Surface: HasWindowHandle + HasRawWindowHandle05 {
 
     fn inner_size(&self) -> PhysicalSize<u32>;
 
+    fn create_subview(&self, attrs: WindowAttributes) -> Box<dyn Subview>;
+
     /// Downcasts this surface to its specific type.
     fn role(&self) -> WindowRole;
     /// Downcasts this surface to its specific type. Returns a mutable reference.

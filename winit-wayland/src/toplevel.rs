@@ -38,7 +38,7 @@ type WinitFrame<T> = sctk_adwaita::AdwaitaFrame<RuntimeState<T>>;
 #[cfg(not(feature = "sctk-adwaita"))]
 type WinitFrame = sctk::shell::xdg::fallback_frame::FallbackFrame<RuntimeState>;
 
-pub struct Window<T: Application + 'static> {
+pub struct Toplevel<T: Application + 'static> {
     /// The last received configure.
     pub last_configure: Option<WindowConfigure>,
 
@@ -98,7 +98,7 @@ pub struct Window<T: Application + 'static> {
     pub window: XdgWindow,
 }
 
-impl<T: Application + 'static> Window<T> {
+impl<T: Application + 'static> Toplevel<T> {
     pub fn new(winit: &mut WinitState<T>, attributes: &WindowAttributes) -> Self {
         let compositor = winit.compositor.clone();
         let surface = compositor.create_surface(&winit.queue_handle);
@@ -295,7 +295,7 @@ impl<T: Application + 'static> Window<T> {
     }
 }
 
-impl<T: Application + 'static> HasWindowHandle for Window<T> {
+impl<T: Application + 'static> HasWindowHandle for Toplevel<T> {
     fn window_handle(&self) -> Result<WindowHandle<'_>, HandleError> {
         let ptr = self.window.wl_surface().id().as_ptr();
         let handle = WaylandWindowHandle::new({
@@ -306,7 +306,7 @@ impl<T: Application + 'static> HasWindowHandle for Window<T> {
     }
 }
 
-impl<T: Application + 'static> WinitSurface for Window<T> {
+impl<T: Application + 'static> WinitSurface for Toplevel<T> {
     fn id(&self) -> WindowId {
         crate::make_wid(&self.window.wl_surface())
     }
@@ -330,9 +330,13 @@ impl<T: Application + 'static> WinitSurface for Window<T> {
     fn role_mut(&mut self) -> WindowRoleMut<'_> {
         WindowRoleMut::Toplevel(self)
     }
+    
+    fn create_subview(&self, attrs: WindowAttributes) -> Box<dyn winit_core::window::Subview> {
+        todo!()
+    }
 }
 
-impl<T: Application + 'static> WinitToplevel for Window<T> {
+impl<T: Application + 'static> WinitToplevel for Toplevel<T> {
     fn title(&self) -> &str {
         &self.title
     }
@@ -494,7 +498,7 @@ impl<T: Application + 'static> WindowHandler for RuntimeState<T> {
     }
 }
 
-unsafe impl<T: Application + 'static> HasRawWindowHandle05 for Window<T> {
+unsafe impl<T: Application + 'static> HasRawWindowHandle05 for Toplevel<T> {
     fn raw_window_handle(&self) -> raw_window_handle_05::RawWindowHandle {
         let mut window_handle = raw_window_handle_05::WaylandWindowHandle::empty();
         window_handle.surface = self.window.wl_surface().id().as_ptr() as *mut _;

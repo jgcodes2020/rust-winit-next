@@ -13,7 +13,7 @@ use winit_core::window::WindowId;
 pub mod event_loop;
 pub mod monitor;
 pub mod state;
-pub mod window;
+pub mod toplevel;
 
 /// Get the WindowId out of the surface.
 #[inline]

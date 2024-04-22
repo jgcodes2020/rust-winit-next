@@ -32,7 +32,7 @@ use winit_core::monitor::{Monitor as WinitMonitor, MonitorId};
 use winit_core::window::{Surface as WinitSurface, WindowAttributes, WindowId};
 
 use crate::monitor::Monitor;
-use crate::window::Window;
+use crate::toplevel::Toplevel;
 
 use crate::event_loop::{EventLoopProxy, RuntimeState};
 
@@ -42,7 +42,7 @@ impl<T: Application + 'static> EventLoopHandle for WinitState<T> {
     }
 
     fn create_window(&mut self, attributes: &WindowAttributes) -> Result<(), ()> {
-        let window = Window::new(self, attributes);
+        let window = Toplevel::new(self, attributes);
         let window_id = window.id();
         self.windows.insert(window_id, window);
         Ok(())
@@ -130,7 +130,7 @@ pub struct WinitState<T: Application + 'static> {
     /// Currently handled seats.
     pub seats: HashMap<ObjectId, ()>,
 
-    pub windows: HashMap<WindowId, Window<T>>,
+    pub windows: HashMap<WindowId, Toplevel<T>>,
 
     pub monitors: Vec<Monitor>,
 
