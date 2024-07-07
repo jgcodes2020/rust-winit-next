@@ -23,12 +23,16 @@ use wayland_client::{Connection, QueueHandle};
 use winit_core::application::Application;
 use winit_core::dpi::{LogicalSize, PhysicalSize, Size};
 use winit_core::monitor::MonitorId;
-use winit_core::window::{Surface as WinitSurface, Theme, Toplevel as WinitToplevel, WindowAttributes, WindowId, WindowRole, WindowRoleMut};
+use winit_core::window::{
+    Popup as WinitPopup, Surface as WinitSurface, Theme, Toplevel as WinitToplevel,
+    WindowAttributes, WindowId, WindowRole, WindowRoleMut,
+};
 
 use crate::event_loop::RuntimeState;
 use crate::logical_to_physical_rounded;
 use crate::monitor::Monitor;
 use crate::state::WinitState;
+use crate::window::Window;
 
 // Minimum window inner size.
 const MIN_WINDOW_SIZE: LogicalSize<u32> = LogicalSize::new(2, 1);
@@ -322,17 +326,13 @@ impl<T: Application + 'static> WinitSurface for Toplevel<T> {
     fn inner_size(&self) -> PhysicalSize<u32> {
         crate::logical_to_physical_rounded(self.size, self.scale_factor)
     }
-    
+
     fn role(&self) -> WindowRole<'_> {
         WindowRole::Toplevel(self)
     }
-    
+
     fn role_mut(&mut self) -> WindowRoleMut<'_> {
         WindowRoleMut::Toplevel(self)
-    }
-    
-    fn create_subview(&self, attrs: WindowAttributes) -> Box<dyn winit_core::window::Subview> {
-        todo!()
     }
 }
 
@@ -420,8 +420,8 @@ impl<T: Application + 'static> WindowHandler for RuntimeState<T> {
         let winit = &mut self.winit;
         let window_id = crate::make_wid(window.wl_surface());
         let window = match winit.windows.get_mut(&window_id) {
-            Some(window) => window,
-            None => return,
+            Some(Window::Toplevel(window)) => window,
+            _ => return,
         };
 
         let scale_factor = window.scale_factor;

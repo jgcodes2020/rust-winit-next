@@ -5,7 +5,7 @@ use raw_window_handle_05::HasRawDisplayHandle as HasRawDisplayHandle05;
 
 use crate::application::Application;
 use crate::monitor::{Monitor, MonitorId};
-use crate::window::{Surface, WindowAttributes, WindowId};
+use crate::window::{PopupAttributes, Surface, WindowAttributes, WindowId};
 
 use self::proxy::EventLoopProxy;
 
@@ -33,7 +33,10 @@ pub trait EventLoopHandle: HasDisplayHandle {
     fn proxy(&self) -> Arc<dyn EventLoopProxy>;
 
     /// Request to create a window.
-    fn create_window(&mut self, attributes: &WindowAttributes) -> Result<(), ()>;
+    fn create_toplevel(&mut self, attributes: &WindowAttributes) -> Result<(), ()>;
+
+    /// Requests to create a popup.
+    // fn create_popup(&mut self, parent: WindowId, attributes: &PopupAttributes) -> Result<(), ()>;
 
     fn num_windows(&self) -> usize;
 

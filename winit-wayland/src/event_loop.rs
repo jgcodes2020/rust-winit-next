@@ -93,7 +93,7 @@ impl<T: Application + 'static> EventLoopRequests<T> for EventLoop<T> {
             let user = self.state.user.as_mut().unwrap();
 
             for (window_id, window) in &mut winit.windows {
-                if mem::take(&mut window.redraw) {
+                if window.take_redraw() {
                     redraw.push(*window_id);
                 }
             }

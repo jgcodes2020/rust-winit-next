@@ -14,6 +14,8 @@ pub mod event_loop;
 pub mod monitor;
 pub mod state;
 pub mod toplevel;
+pub mod popup;
+pub mod window;
 
 /// Get the WindowId out of the surface.
 #[inline]

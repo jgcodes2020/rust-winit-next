@@ -35,16 +35,17 @@ use crate::monitor::Monitor;
 use crate::toplevel::Toplevel;
 
 use crate::event_loop::{EventLoopProxy, RuntimeState};
+use crate::window::Window;
 
 impl<T: Application + 'static> EventLoopHandle for WinitState<T> {
     fn proxy(&self) -> Arc<dyn CoreEventLoopProxy> {
         self.proxy.clone()
     }
 
-    fn create_window(&mut self, attributes: &WindowAttributes) -> Result<(), ()> {
+    fn create_toplevel(&mut self, attributes: &WindowAttributes) -> Result<(), ()> {
         let window = Toplevel::new(self, attributes);
         let window_id = window.id();
-        self.windows.insert(window_id, window);
+        self.windows.insert(window_id, Window::Toplevel(window));
         Ok(())
     }
 
@@ -55,19 +56,19 @@ impl<T: Application + 'static> EventLoopHandle for WinitState<T> {
     fn get_window(&self, window_id: WindowId) -> Option<&dyn WinitSurface> {
         let window = self.windows.get(&window_id)?;
 
-        if window.last_configure.is_none() {
-            return None;
-        } else {
+        if window.configured() {
             Some(window as &dyn WinitSurface)
+        } else {
+            None
         }
     }
 
     fn get_window_mut(&mut self, window_id: WindowId) -> Option<&mut dyn WinitSurface> {
         let window = self.windows.get_mut(&window_id)?;
-        if window.last_configure.is_none() {
-            return None;
-        } else {
+        if window.configured() {
             Some(window as &mut dyn WinitSurface)
+        } else {
+            None
         }
     }
 
@@ -130,7 +131,7 @@ pub struct WinitState<T: Application + 'static> {
     /// Currently handled seats.
     pub seats: HashMap<ObjectId, ()>,
 
-    pub windows: HashMap<WindowId, Toplevel<T>>,
+    pub windows: HashMap<WindowId, Window<T>>,
 
     pub monitors: Vec<Monitor>,
 
@@ -199,9 +200,13 @@ impl<T: Application + 'static> WinitState<T> {
     ) {
         let winit = &mut state.winit;
         let window_id = crate::make_wid(surface);
+        // let window = match winit.windows.get_mut(&window_id) {
+        //     Some(window) => window,
+        //     None => return,
+        // };
         let window = match winit.windows.get_mut(&window_id) {
-            Some(window) => window,
-            None => return,
+            Some(Window::Toplevel(window)) => window,
+            _ => return,
         };
 
         window.set_scale_factor(scale_factor);
