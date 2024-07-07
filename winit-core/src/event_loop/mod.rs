@@ -36,7 +36,7 @@ pub trait EventLoopHandle: HasDisplayHandle {
     fn create_toplevel(&mut self, attributes: &WindowAttributes) -> Result<(), ()>;
 
     /// Requests to create a popup.
-    // fn create_popup(&mut self, parent: WindowId, attributes: &PopupAttributes) -> Result<(), ()>;
+    fn create_popup(&mut self, parent: WindowId, attributes: &PopupAttributes) -> Result<(), ()>;
 
     fn num_windows(&self) -> usize;
 

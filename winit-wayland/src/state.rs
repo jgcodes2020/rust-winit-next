@@ -32,6 +32,7 @@ use winit_core::monitor::{Monitor as WinitMonitor, MonitorId};
 use winit_core::window::{Surface as WinitSurface, WindowAttributes, WindowId};
 
 use crate::monitor::Monitor;
+use crate::popup::Popup;
 use crate::toplevel::Toplevel;
 
 use crate::event_loop::{EventLoopProxy, RuntimeState};
@@ -46,6 +47,14 @@ impl<T: Application + 'static> EventLoopHandle for WinitState<T> {
         let window = Toplevel::new(self, attributes);
         let window_id = window.id();
         self.windows.insert(window_id, Window::Toplevel(window));
+        Ok(())
+    }
+
+    // TODO(jgcodes2020): can/should we ensure window type safety here?
+    fn create_popup(&mut self, parent: WindowId, attributes: &winit_core::window::PopupAttributes) -> Result<(), ()> {
+        let popup = Popup::new(self, parent, attributes)?;
+        let popup_id = popup.id();
+        self.windows.insert(popup_id, Window::Popup(popup));
         Ok(())
     }
 
@@ -86,6 +95,8 @@ impl<T: Application + 'static> EventLoopHandle for WinitState<T> {
     fn monitors(&self) -> Vec<&dyn WinitMonitor> {
         self.monitors.iter().map(|monitor| monitor as &dyn WinitMonitor).collect()
     }
+    
+    
 }
 
 impl<T: Application + 'static> HasDisplayHandle for WinitState<T> {
@@ -307,3 +318,4 @@ sctk::delegate_shm!(@<T: Application + 'static> RuntimeState<T>);
 sctk::delegate_compositor!(@<T: Application + 'static> RuntimeState<T>);
 sctk::delegate_xdg_shell!(@<T: Application + 'static> RuntimeState<T>);
 sctk::delegate_xdg_window!(@<T: Application + 'static> RuntimeState<T>);
+sctk::delegate_xdg_popup!(@<T: Application + 'static> RuntimeState<T>);

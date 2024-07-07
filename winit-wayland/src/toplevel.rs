@@ -472,7 +472,7 @@ impl<T: Application + 'static> WindowHandler for RuntimeState<T> {
         };
 
         let user = self.user.as_mut().unwrap();
-        let initial_configue = window.last_configure.is_none();
+        let initial_configure = window.last_configure.is_none();
         window.last_configure = Some(configure);
 
         window.resize(new_size);
@@ -485,14 +485,14 @@ impl<T: Application + 'static> WindowHandler for RuntimeState<T> {
         // NOTE: we consider window as created when its initial configure arrives, until
         // then it's considered as not created and attempt to get it will result in
         // error.
-        if initial_configue {
+        if initial_configure {
             user.created(winit, window_id);
             user.scale_factor_changed(winit, window_id, scale_factor);
         }
 
         user.resized(winit, window_id, logical_to_physical_rounded(new_size, scale_factor));
 
-        if initial_configue {
+        if initial_configure {
             user.redraw_requested(winit, window_id);
         }
     }

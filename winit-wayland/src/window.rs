@@ -3,7 +3,8 @@ use std::mem;
 use raw_window_handle::{HandleError, HasWindowHandle, WaylandWindowHandle, WindowHandle};
 use raw_window_handle_05::HasRawWindowHandle as HasRawWindowHandle05;
 
-use sctk::shell::xdg::window::WindowConfigure;
+use sctk::shell::{xdg::{window::WindowConfigure, XdgSurface}, WaylandSurface};
+use wayland_client::protocol::wl_surface::WlSurface;
 use winit_core::{application::Application, window::Surface};
 
 use crate::{popup::Popup, toplevel::Toplevel};
@@ -28,6 +29,36 @@ impl<T: Application + 'static> Window<T> {
             Window::Toplevel(toplevel) => &mut toplevel.redraw,
             Window::Popup(popup) => &mut popup.redraw,
         })
+    }
+
+    pub(crate) fn is_xdg_surface(&self) -> bool {
+        match self {
+            Window::Toplevel(_) => true,
+            Window::Popup(_) => true,
+            #[allow(unreachable_patterns)]
+            _ => false
+        }
+    }
+}
+
+impl<T: Application + 'static> WaylandSurface for Window<T> {
+    fn wl_surface(&self) -> &wayland_client::protocol::wl_surface::WlSurface {
+        match self {
+            Window::Toplevel(toplevel) => toplevel.window.wl_surface(),
+            Window::Popup(popup) => popup.popup.wl_surface(),
+        }
+    }
+}
+
+impl<T: Application + 'static> XdgSurface for Window<T> {
+    fn xdg_surface(&self) -> &wayland_protocols::xdg::shell::client::xdg_surface::XdgSurface {
+        match self {
+            Window::Toplevel(toplevel) => toplevel.window.xdg_surface(),
+            Window::Popup(popup) => popup.popup.xdg_surface(),
+            #[allow(unreachable_patterns)]
+            _ => panic!("Not an XDG surface")
+            
+        }
     }
 }
 

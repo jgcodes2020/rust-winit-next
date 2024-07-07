@@ -61,7 +61,7 @@ pub trait Toplevel: Surface {
 
 /// API for popups.
 pub trait Popup: Surface {
-    fn set_position(&mut self, position: PhysicalPosition<u32>);
+    // fn set_position(&mut self, position: PhysicalPosition<u32>);
 }
 
 /// Attributes to use when creating a window.
